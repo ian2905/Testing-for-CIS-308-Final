@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <time.h>
 #include <math.h>
 #include "lib\conio.h"
@@ -9,8 +10,11 @@
 #endif
 #define CYCLE .5
 #define JUMP_HEIGHT 3
+#define WIDTH 150
+#define HEIGHT 12
 
-void updatePlayer();
+void updatePlayer(States state, int height);
+void clear();
 
 int main() {
     States state = Idle;
@@ -21,15 +25,24 @@ int main() {
     clock_t gameTime;
     clock_t actionTime;
     clock_t time = clock();
+    int jumpHeight = 0;
 
     while(gameOver == False){
         gameTime = clock();
-        if((gameTime - time)/CLOCKS_PER_SEC > CYCLE){
+        if((double)(gameTime - time)/CLOCKS_PER_SEC > CYCLE){
             time = gameTime;
-            updatePlayer();
+            int cycles = (int)(gameTime - actionTime)/(CLOCKS_PER_SEC*2);
+            if(cycles <= 3){
+                jumpHeight = cycles;
+            }
+            else{
+                jumpHeight = 6 - cycles;
+            }
+            updatePlayer(state, cycles);
         }
-        if(actionTime != NULL && ((gameTime - actionTime)/CLOCKS_PER_SEC > CYCLE*JUMP_HEIGHT*2))
-        state = checkInput(actionState);
+        if(actionTime == NULL && ((double)(gameTime - actionTime)/CLOCKS_PER_SEC > CYCLE*JUMP_HEIGHT*2)){
+            state = checkInput(actionState);
+        }
 
         switch(state){
             case Idle:
@@ -37,12 +50,12 @@ int main() {
             case Jump:
                 actionTime = clock();
                 actionState = InAction;
-                Jump();
+                //Jump();
                 break;
             case Duck:
                 actionTime = clock();
                 actionState = InAction;
-                Duck();
+                //Duck();
                 break;
             case GameOver:
                 gameOver = True;
@@ -54,6 +67,32 @@ int main() {
 }
 
 
-void updatePlayer(){
+void updatePlayer(States state, int height){
+    clear();
+    for(int i = 0; i < WIDTH; i++){
+        printf("#");
+    }
+    printf("\n");
+    for(int i = 0; i < HEIGHT; i++){
+        for(int j = 0; j < WIDTH; j++){
+            if(j == 2) {
+                if(j == (HEIGHT - 1) - height){
+                    printf(0);
+                }
+            }
+        }
+        printf("\n");
+    }
+    for(int i = 0; i < WIDTH; i++){
+        printf("#");
+    }
+    printf("\n");
+}
 
+void clear(){
+#ifdef OS_Windows
+    system("cls");
+#else
+    system("clear");
+#endif
 }
